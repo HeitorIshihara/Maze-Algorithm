@@ -39,10 +39,15 @@ void insereFila(TFila *F, Ponto *elemento);
 Ponto retiraFila(TFila *F);
 int vazia(TFila *F);
 int cheia(TFila *F);
-void showFila(Fila *fila);
+void showFila(TFila *fila);
 
 //Nossas funções
 void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j);
+
+
+//Variaveis Globais
+Ponto *pontoInicial;
+Ponto *pontoFinal;
 
 int main(){
 
@@ -98,23 +103,21 @@ int main(){
 
     show(digrafo);
 
-    //Criando caminho com os pontos inicial e final fornecidos pelo usuï¿½rio
+    //Criando caminho com os pontos inicial e final fornecidos pelo usuario
     Caminho *caminho;	 
 	caminho = (Caminho *)malloc(sizeof(Caminho));
 
-	Ponto *pontoInicial;
 	pontoInicial = (Ponto *)malloc(sizeof(Ponto));
-    printf ("\nDigite i e j do ponto inicial: ");
+    printf ("\nDigite i e j do ponto inicial: \n");
     scanf ("%d",&i);
 	scanf ("%d",&j);
 	pontoInicial->i = i;
 	pontoInicial->j = j;
     caminho->inicial = pontoInicial;
 
-
-    Ponto *pontoFinal;
+    
     pontoFinal = (Ponto *)malloc(sizeof(Ponto));
-    printf ("\nDigite i e j do ponto final: ");
+    printf ("\nDigite i e j do ponto final: \n");
     scanf ("%d",&i);
     scanf ("%d",&j);
     pontoFinal->i = i;
@@ -133,17 +136,17 @@ int main(){
 
 //Preenche os vizinhos e coloca eles na fila
 void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j) {
+	
 		
 	int ponto = digrafo->adj[i][j];
     ponto++;
     
     Ponto *vizinho;
 	vizinho = (Ponto*)malloc(sizeof(Ponto));
-
     
 	//Vizinho de cima
 	if(i > 0 ) { //Condição para evitar as bordas
-		if(digrafo->adj[i - 1][j] > -1) { //Condição para evitar os blocos com -1
+		if(digrafo->adj[i - 1][j] == 0) { //Condição para evitar os blocos com -1
         	digrafo->adj[i - 1][j] = ponto;
         	vizinho->i = i - 1;
 	    	vizinho->j = j;
@@ -153,7 +156,7 @@ void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j) {
 
 	//Vizinho da direita
     if((j+1) < digrafo->V){
-        if(digrafo->adj[i][j + 1] > -1) {
+        if(digrafo->adj[i][j + 1] == 0) {
             digrafo->adj[i][j + 1] = ponto;
             vizinho->i = i;
 			vizinho->j = j + 1;
@@ -162,7 +165,7 @@ void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j) {
 	}
 	//Vizinho de baixo
     if((i+1) < digrafo->V){
-        if(digrafo->adj[i + 1][j] > -1) {
+        if(digrafo->adj[i + 1][j] == 0) {
             digrafo->adj[i + 1][j] = ponto;
             vizinho->i = i + 1;
 			vizinho->j = j;
@@ -172,7 +175,7 @@ void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j) {
 
 	//Vizinho da esquerda
     if(j > 0) {
-        if(digrafo->adj[i][j - 1] > -1){
+        if(digrafo->adj[i][j - 1] == 0){
             digrafo->adj[i][j - 1] = ponto;
             vizinho->i = i;
 			vizinho->j = j - 1;
@@ -205,6 +208,10 @@ void menorCaminho(TDigrafo *D,Caminho *C){
 		Ponto vizinho = retiraFila(fila);
 		preencheVizinho(D, fila, vizinho.i, vizinho.j);
 	}
+	
+	//Setar Inicial e final como 0 novamente
+	D->adj[inicial->i][inicial->j] = 0;
+	D->adj[final->i][final->j] = 0;
 	
 	show(D);
 	
@@ -253,7 +260,7 @@ int cheia(TFila *F){
 	return (F->last + 1)%F->N==F->first; 
 }
 
-void showFila(Fila *fila) {
+void showFila(TFila *fila) {
 	//Mostra a fila para teste
 	int i = 0;
 	for(i = 0; i < 10; i++) {
@@ -300,13 +307,14 @@ void show(TDigrafo *D){
 	for( v = 0; v < D->V; v++){ // linha
 		printf("\n%d:",v);
 		for(w=0; w < D->V; w++ ) // coluna
-	        if(D->adj[v][w]==-1){
+	        if(D->adj[v][w] == -1 || D->adj[v][w] == -2 || D->adj[v][w] == -3){
 	        	printf("%d ", D->adj[v][w]);
 			}
 			else{
 				printf(" %d ", D->adj[v][w]); //Apenas para ficar bonito no show
 			}
 	}
+	
 }
 
 void showMatriz(TDigrafo *D){
