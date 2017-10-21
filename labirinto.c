@@ -28,7 +28,6 @@ typedef struct{
 // Declaração das funções
 //Funções do Digrafo
 TDigrafo * Init( int V );
-void menorCaminho(TDigrafo *D,Caminho *C);
 void show(TDigrafo *D);
 void showMatriz(TDigrafo *D);
 void libera(TDigrafo *D);
@@ -42,7 +41,9 @@ int cheia(TFila *F);
 void showFila(TFila *fila);
 
 //Nossas funções
+void menorCaminho(TDigrafo *D,Caminho *C);
 void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j);
+Ponto menorVizinho(TDigrafo *D, Ponto p);
 
 
 //Variaveis Globais
@@ -57,6 +58,9 @@ int main(){
 
 	int i = 0;
 	int j = 0;
+	
+	int iF = 0;
+	int jF = 0;
 
 	char url[]="entrada.txt";
     FILE *arq;
@@ -103,26 +107,42 @@ int main(){
 
     show(digrafo);
 
+	//Receber input do usuario e verficar validade dos pontos
+	int valido = 0;
+	while(!valido) {
+    	printf ("\nDigite i e j do ponto inicial: \n");
+    	scanf ("%d",&i);
+		scanf ("%d",&j);
+		
+    	printf ("\nDigite i e j do ponto final: \n");
+    	scanf ("%d",&iF);
+    	scanf ("%d",&jF);
+    	
+    	if(digrafo->adj[i][j] != -1 && digrafo->adj[iF][jF] != -1) {
+    		valido = 1;
+		}
+		else {
+			printf("Pontos invalidos. Certifique-se de escolher pontos que nao correspondem a paredes.\n");
+		}
+	}
+	
     //Criando caminho com os pontos inicial e final fornecidos pelo usuario
-    Caminho *caminho;	 
-	caminho = (Caminho *)malloc(sizeof(Caminho));
-
+    //Receber input do usuario
 	pontoInicial = (Ponto *)malloc(sizeof(Ponto));
-    printf ("\nDigite i e j do ponto inicial: \n");
-    scanf ("%d",&i);
-	scanf ("%d",&j);
 	pontoInicial->i = i;
 	pontoInicial->j = j;
-    caminho->inicial = pontoInicial;
-
     
     pontoFinal = (Ponto *)malloc(sizeof(Ponto));
-    printf ("\nDigite i e j do ponto final: \n");
-    scanf ("%d",&i);
-    scanf ("%d",&j);
-    pontoFinal->i = i;
-    pontoFinal->j = j;
+    pontoFinal->i = iF;
+    pontoFinal->j = jF;
+    
+    Caminho *caminho;	 
+	caminho = (Caminho *)malloc(sizeof(Caminho));
+    caminho->inicial = pontoInicial;
     caminho->final = pontoFinal;
+
+
+    
 
     //Busca do menor caminho entre os pontos dados
     menorCaminho(digrafo, caminho);
@@ -184,6 +204,56 @@ void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j) {
 	}
 }
 
+//Verifica qual o caminho vizinho a ser seguido
+Ponto menorVizinho(TDigrafo *D, Ponto p) {
+	int menor = D->V * D->V;
+	int i = p.i;
+	int j = p.j;
+	
+	Ponto *menorVizinho;
+	menorVizinho = (Ponto*)malloc(sizeof(Ponto));
+	menorVizinho->i = -1;
+	menorVizinho->j = -1;
+	
+	//Vizinho de cima
+	if(i > 0){
+		if(D->adj[p.i - 1][p.j] != -1 && D->adj[p.i - 1][p.j] == D->adj[p.i][p.j] - 1) {
+			menor = D->adj[p.i - 1][p.j];
+			menorVizinho->i = p.i - 1;
+			menorVizinho->j = p.j;
+		}
+	}
+	
+	//Vizinho da direita
+	if((j + 1) < D->V){
+		if(D->adj[p.i][p.j + 1] != -1 && D->adj[p.i][p.j + 1] == D->adj[p.i][p.j] - 1) { 
+			menor = D->adj[p.i][p.j + 1];
+			menorVizinho->i = p.i;
+			menorVizinho->j = p.j + 1;
+		}
+	}
+	
+	//Vizinho de baixo
+	if((i + 1) < D->V){	
+		if(D->adj[p.i + 1][p.j] != -1 && D->adj[p.i + 1][p.j] == D->adj[p.i][p.j] - 1) { 
+			menor = D->adj[p.i + 1][p.j];
+			menorVizinho->i = p.i + 1;
+			menorVizinho->j = p.j;
+		}
+	}
+	
+	//Vizinho da esquerda
+	if(j > 0){	
+		if(D->adj[p.i][p.j - 1] != -1 && D->adj[p.i][p.j - 1] == D->adj[p.i][p.j] - 1) { 
+			menor = D->adj[p.i][p.j - 1];
+			menorVizinho->i = p.i;
+			menorVizinho->j = p.j - 1;
+		}
+	}
+	
+	return *menorVizinho;
+}
+
 void menorCaminho(TDigrafo *D,Caminho *C){
 
 	//Guardar pontos final e inicial em uma variavel para facilitar acesso
@@ -197,7 +267,7 @@ void menorCaminho(TDigrafo *D,Caminho *C){
 	final = C->final;
 
 	//Criar fila
-	TFila *fila = InitFila(30);
+	TFila *fila = InitFila(10);
 
 	//Prenche os vizinhos da casa inicial com 1 
 	preencheVizinho(D, fila, inicial->i, inicial->j);
@@ -209,9 +279,37 @@ void menorCaminho(TDigrafo *D,Caminho *C){
 		preencheVizinho(D, fila, vizinho.i, vizinho.j);
 	}
 	
-	//Setar Inicial e final como 0 novamente
-	D->adj[inicial->i][inicial->j] = 0;
-	D->adj[final->i][final->j] = 0;
+	
+	//Verificar se o caminho chegou ate o destino final
+	if(D->adj[final->i][final->j] != 0) {
+
+		printf("\nChegou no destino");
+
+		//Setar Inicial como 0 novamente para fazer a conta do caminho
+		D->adj[inicial->i][inicial->j] = 0;
+		
+		//Tracar caminho
+		printf("\ni = %d e j = %d", final->i, final->j);
+		
+		Ponto *vizinhoMenor;
+		vizinhoMenor = (Ponto*)malloc(sizeof(Ponto));
+		*vizinhoMenor = menorVizinho(D, *final);
+		printf("\ni = %d e j = %d", vizinhoMenor->i, vizinhoMenor->j);
+		
+		while(D->adj[vizinhoMenor->i][vizinhoMenor->j] != 0){
+			*vizinhoMenor = menorVizinho(D, *vizinhoMenor);
+			printf("\ni = %d e j = %d", vizinhoMenor->i, vizinhoMenor->j);
+		}
+	} 
+	else {
+		
+		printf("\nNao chegou no destino");
+		
+		//Setar Inicial como 0 novamente para printar
+		D->adj[inicial->i][inicial->j] = 0;
+	}
+	
+	
 	
 	show(D);
 	
@@ -238,7 +336,6 @@ void insereFila(TFila *F, Ponto *elemento){
 	}
 	else{
 		printf("fila cheia\n");
-		showFila(F);
 		exit(1);
 	}
 }
