@@ -118,11 +118,17 @@ int main(){
     	scanf ("%d",&iF);
     	scanf ("%d",&jF);
     	
-    	if(digrafo->adj[i][j] != -1 && digrafo->adj[iF][jF] != -1) {
+    	if(i == iF && j == jF) {
+    		printf("Pontos invalidos. Certifique-se de escolher pontos diferentes.\n");
+		}
+		else if(i < 0 || j < 0 || iF < 0 || jF < 0){
+			printf("Pontos invalidos. Certifique-se de escolher pontos maiores que zero.\n");
+		}
+    	else if(digrafo->adj[i][j] != -1 && digrafo->adj[iF][jF] != -1) {
     		valido = 1;
 		}
 		else {
-			printf("Pontos invalidos. Certifique-se de escolher pontos que nao correspondem a paredes.\n");
+			printf("Pontos invalidos. Certifique-se de escolher pontos diferentes e que nao correspondem a paredes.\n");
 		}
 	}
 	
