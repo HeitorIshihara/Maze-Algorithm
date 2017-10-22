@@ -171,8 +171,8 @@ void preencheVizinho(TDigrafo* digrafo, TFila* fila,  int i, int j) {
 	vizinho = (Ponto*)malloc(sizeof(Ponto));
     
 	//Vizinho de cima
-	if(i > 0 ) { //Condição para evitar as bordas
-		if(digrafo->adj[i - 1][j] == 0) { //Condição para evitar os blocos com -1
+	if(i > 0 ) { //Condicao para evitar as bordas
+		if(digrafo->adj[i - 1][j] == 0) { //Condicao para evitar os blocos com -1
         	digrafo->adj[i - 1][j] = ponto;
         	vizinho->i = i - 1;
 	    	vizinho->j = j;
@@ -260,8 +260,9 @@ Ponto menorVizinho(TDigrafo *D, Ponto p) {
 	return *menorVizinho;
 }
 
+//Imprime as coordenadas que representam o menor caminho que deve ser percorrido para atingir o ponto final
 void menorCaminho(TDigrafo *D,Caminho *C){
-
+    
 	//Guardar pontos final e inicial em uma variavel para facilitar acesso
 	Ponto *inicial;
 	Ponto *final;
@@ -284,6 +285,14 @@ void menorCaminho(TDigrafo *D,Caminho *C){
 		Ponto vizinho = retiraFila(fila);
 		preencheVizinho(D, fila, vizinho.i, vizinho.j);
 	}
+    
+    /*
+     Vetor de impressao, com N*N posi›es, o preenchimento do vetor Ž o caminho
+     do fim para o in’cio, portanto para mostrar a ordem correta, o vetor Ž imprimido
+     na ordem inversa
+     */
+    Ponto *impressao = (Ponto *)malloc((D->adj[final->i][final->j])*sizeof(Ponto));
+    int k = 0;
 	
 	
 	//Verificar se o caminho chegou ate o destino final
@@ -295,17 +304,26 @@ void menorCaminho(TDigrafo *D,Caminho *C){
 		D->adj[inicial->i][inicial->j] = 0;
 		
 		//Tracar caminho
-		printf("\ni = %d e j = %d", final->i, final->j);
+        impressao[k] = *final;
+        k++;
 		
 		Ponto *vizinhoMenor;
 		vizinhoMenor = (Ponto*)malloc(sizeof(Ponto));
 		*vizinhoMenor = menorVizinho(D, *final);
-		printf("\ni = %d e j = %d", vizinhoMenor->i, vizinhoMenor->j);
+        impressao[k] = *vizinhoMenor;
+        k++;
 		
 		while(D->adj[vizinhoMenor->i][vizinhoMenor->j] != 0){
 			*vizinhoMenor = menorVizinho(D, *vizinhoMenor);
-			printf("\ni = %d e j = %d", vizinhoMenor->i, vizinhoMenor->j);
+            impressao[k] = *vizinhoMenor;
+            k++;
 		}
+        
+        //Imprimir o percurso
+        int x;
+        for(x = k-1;x >= 0;x--){
+            printf("\ni = %d e j = %d", impressao[x].i, impressao[x].j);
+        }
 	} 
 	else {
 		
